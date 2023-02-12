@@ -3,7 +3,7 @@ import numpy as np
 import dlib
 import time
 
-MID_X = 320
+MID_X = 80
 
 class libcamera(object):
     def __init__(self):
@@ -14,7 +14,7 @@ class libcamera(object):
         self.y_63 = 0
         self.x_67 = 0
         self.y_67 = 0
-        self.predictor = dlib.shape_predictor("Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
+        self.predictor = dlib.shape_predictor("/home/pi/Face_Control_Wheelchair/Face_Control_Wheelchair_mainpc/shape_predictor_68_face_landmarks.dat")
         self.detector = dlib.get_frontal_face_detector()
 
     def loop_break(self):
@@ -31,19 +31,19 @@ class libcamera(object):
         self.capnum = capnum
 
         if capnum == 1:
-            channel0 = cv2.VideoCapture(cam0port, cv2.CAP_DSHOW)
+            channel0 = cv2.VideoCapture(cam0port, cv2.CAP_V4L2)
             if channel0.isOpened():
                 print("Camera Channel0 is enabled!")
         elif capnum == 2:
-            channel0 = cv2.VideoCapture(cam0port, cv2.CAP_DSHOW)
+            channel0 = cv2.VideoCapture(cam0port, cv2.CAP_V4L2)
             if channel0.isOpened():
                 print("Camera Channel0 is enabled!")
-            channel1 = cv2.VideoCapture(cam1port, cv2.CAP_DSHOW)
+            channel1 = cv2.VideoCapture(cam1port, cv2.CAP_V4L2)
             if channel1.isOpened():
                 print("Camera Channel0 is enabled!")
 
-        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 160)
+        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 120)
         channel0.set(cv2.CAP_PROP_FPS, 60)
         
         channel1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)

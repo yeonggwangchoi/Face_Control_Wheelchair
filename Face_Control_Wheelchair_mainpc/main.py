@@ -3,13 +3,12 @@ import raspberryserial as raspberry
 import numpy as np
 
 #고정상수&고정변수 초기화
-atmega_port = 'com15'
-red_traffic = False
+raspberry_port = '/dev/ttyAMA0'
     
 if __name__ == "__main__":
     #각 class 초기화
     ser = raspberry.Raspberry()
-    com = ser.init(port = atmega_port, baudrate = 9600)
+    com = ser.init(port = raspberry_port, baudrate = 9600)
     cam = cam.libcamera()
     ch0, ch1 = cam.initial_setting(capnum=2)
 
