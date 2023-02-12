@@ -14,6 +14,7 @@ class libcamera(object):
         self.y_63 = 0
         self.x_67 = 0
         self.y_67 = 0
+        self.cnn_face_detector = dlib.cnn_face_detection_model_v1('/content/drive/MyDrive/colab/Computer-Vision-Course/Data/Weights/mmod_human_face_detector.dat')
         self.predictor = dlib.shape_predictor("/home/pi/Face_Control_Wheelchair/Face_Control_Wheelchair_mainpc/shape_predictor_68_face_landmarks.dat")
         self.detector = dlib.get_frontal_face_detector()
 
@@ -75,7 +76,12 @@ class libcamera(object):
         replica = frame0.copy()
         rows, cols = replica.shape[:2]
         dets = detector(replica, 1)
-
+        #추가
+        face_detections = self.cnn_face_detector(replica, 1)
+        for idx, face_detection in enumerate(face_detections):
+            left, top, right, bottom, confidence = face_detection.rect.left(), face_detection.rect.top(), face_detection.rect.right(), face_detection.rect.bottom(), face_detection.confidence
+            print(f'confidence{idx+1}: {confidence}')  # print confidence of the detection
+            cv2.rectangle(replica, (left, top), (right, bottom), (0, 255, 0), 2)
         if len(dets) == 0:
             print("----------------------------")
             print("얼굴 인식 실패")
