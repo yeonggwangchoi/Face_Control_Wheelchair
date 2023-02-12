@@ -1,31 +1,36 @@
 import camera as cam
 import atmegaserial as atmega
+import raspberryserial as raspberry
+
 import numpy as np
 #고정상수&고정변수 초기화
 EPOCH = 500000
 atmega_port = 'com15'
+raspberry_port = 'com15'
 red_traffic = False
     
 if __name__ == "__main__":
     #각 class 초기화
-    ser = atmega.ATmega128()
-    com = ser.init(port = atmega_port, baudrate = 9600)
+    ser_at = atmega.ATmega128()
+    com_at = ser_at.init(port = atmega_port, baudrate = 9600)
+    ser_rasp = raspberry.Raspberry()
+    com_desk = ser_rasp.init(port = atmega_port, baudrate = 9600)
     cam = cam.libcamera()
     ch0, ch1 = cam.initial_setting(capnum=2)
 
     while True:
         _, frame0, _, frame1 = cam.camera_read(ch0, ch1)
 
-        cam.face_detect(frame0)
-        sorvo = cam.face_direction()
+        motor = com_desk.read()
+
         if np.any(cam.object_detect_cls == 9) == True:
            red_traffic = cam.traffic_light_detect(frame1)
         obstacle = cam.object_detect(frame1)
 
-        if (red_traffic == True and sorvo == 'G') or (obstacle == False and sorvo == 'G'):
-            com.write(b'S')
+        if (red_traffic == True and motor == b'G') or (obstacle == False and motor == b'G'):
+            com_at.write(b'S')
         else:
-            com.write(sorvo.encode())
-
+            com_at.write(motor)
+    
         if cam.loop_break():
             break
