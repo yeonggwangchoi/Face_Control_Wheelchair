@@ -1,4 +1,4 @@
-import library as lib
+import library_copy as lib
 
 EPOCH = 500000
 
@@ -11,8 +11,6 @@ if __name__ == "__main__":
         _, frame0, _, frame1 = lib.camera_read(ch0, ch1)
 
         lib.face_detect(frame0)
-        sorvo = lib.face_direction()
-        print(sorvo)
         
         if lib.loop_break():
             break
