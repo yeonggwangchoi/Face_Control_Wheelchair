@@ -7,7 +7,7 @@ class libcamera:
         self.capnum = 0
         self.mid_x = 0
         self.mid_y = 0
-        self.predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+        self.predictor = dlib.shape_predictor("C:/Users/dudrh/glorychoi/Face_Control_Wheelchair/Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
         self.detector = dlib.get_frontal_face_detector()
 
     def loop_break(self):
