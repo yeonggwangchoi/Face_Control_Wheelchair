@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import dlib
 
+MID_X = 320
+
 class libcamera:
     def __init__(self):
         self.capnum = 0
@@ -35,12 +37,12 @@ class libcamera:
             if channel1.isOpened():
                 print("Camera Channel0 is enabled!")
 
-        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 160)
-        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 120)
+        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         channel0.set(cv2.CAP_PROP_FPS, 60)
-        # channel1.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-        # channel1.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-        # channel1.set(cv2.CAP_PROP_FPS, 60)
+        channel1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        channel1.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        channel1.set(cv2.CAP_PROP_FPS, 60)
 
         return channel0, channel1
     
@@ -60,11 +62,11 @@ class libcamera:
             cv2.imshow('frame0', frame0)
             cv2.imshow('frame1', frame1)
         
-    def face_detect(self, frame):
+    def face_detect(self, frame0, frame1):
         detector = self.detector
         predictor = self.predictor
 
-        replica = frame.copy()
+        replica = frame0.copy()
         rows, cols = replica.shape[:2]
         dets = detector(replica, 1)
 
@@ -87,18 +89,16 @@ class libcamera:
                     if i == 34:
                         self.mid_x, self.mid_y = shape_point.x, shape_point.y
         
-        self.image_show(replica)
+        self.image_show(replica, frame1)
     
     def face_direction(self):
-        MID_X = 160
-        HALF_MID_X = 80
 
-        if self.mid_x == HALF_MID_X:
+        if abs(self.mid_x - MID_X) < 20:
             return 'G'
         else:
-            if HALF_MID_X - self.mid_x > 0:
-                abs(HALF_MID_X - self.mid_x)
+            if MID_X - self.mid_x > 0:
+                abs(MID_X - self.mid_x)
                 return 'R'
             else:
-                abs(HALF_MID_X - self.mid_x)
+                abs(MID_X - self.mid_x)
                 return 'L'
