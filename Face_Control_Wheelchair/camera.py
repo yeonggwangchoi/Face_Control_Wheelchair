@@ -1,16 +1,19 @@
 import cv2
 import numpy as np
 import dlib
+import torch
 
 MID_X = 320
 
-class libcamera:
+class libcamera(object):
     def __init__(self):
         self.capnum = 0
         self.mid_x = 0
         self.mid_y = 0
         self.predictor = dlib.shape_predictor("C:/Users/dudrh/glorychoi/Face_Control_Wheelchair/Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
         self.detector = dlib.get_frontal_face_detector()
+        self.traffic_model = torch.hub.load('C:/Users/user/Desktop/yolov5', 'custom','C:/Users/user/PycharmProjects/car_project/best_2.pt', source='local')
+        self.obstacle = torch.hub.load('C:/Users/user/Desktop/yolov5', 'custom','C:/Users/user/PycharmProjects/car_project/best_2.pt', source='local')
 
     def loop_break(self):
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -40,6 +43,7 @@ class libcamera:
         channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         channel0.set(cv2.CAP_PROP_FPS, 60)
+        
         channel1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         channel1.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         channel1.set(cv2.CAP_PROP_FPS, 60)
@@ -102,3 +106,46 @@ class libcamera:
             else:
                 abs(MID_X - self.mid_x)
                 return 'L'
+            
+    def traffic_light(self, frame1, comm):
+        results = self.traffic_model(frame1)
+        result = results.pandas().xyxy[0].to_numpy()
+        if result.size == 0:
+            print(result)
+            print("None")
+            cv2.imshow('frame0', frame1)
+        else:
+            print(result)
+            if result[0][5] == 0:
+                cv2.rectangle(frame1, (int(result[0][0]), int(result[0][1])), (int(result[0][2]), int(result[0][3])),
+                            (0, 255, 0), 2)
+                print("Green")
+                cv2.imshow('frame0', frame1)
+                com = b'3'
+                print(com)
+                comm.write(com)
+                return 0
+            elif result[0][5] == 1:
+                print("Red")
+                cv2.rectangle(frame1, (int(result[0][0]), int(result[0][1])), (int(result[0][2]), int(result[0][3])),
+                            (0, 0, 255), 2)
+                cv2.imshow('frame0', frame1)
+                if int(result[0][2]) < 280 and int(result[0][3]) < 100:
+
+                    com = b'0'
+                    print(com)
+                    comm.write(com)
+                    time.sleep(1)
+                    return 1
+                else:
+                    return 0
+            else:
+                print("Yellow")
+                cv2.rectangle(frame1, (int(result[0][0]), int(result[0][1])), (int(result[0][2]), int(result[0][3])),
+                            (0, 0, 0), 2)
+                cv2.imshow('frame0', frame1)
+                return 0
+            
+        def obstacle(self, frame1):
+            results = self.obstacle(frame1)
+            result = results.pandas().xyxy[0].to_numpy()
