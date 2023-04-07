@@ -1,0 +1,13 @@
+train: D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light_Train/train/images
+val: D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light_Train/valid/images
+test: D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light_Train/test/images
+
+nc: 3
+names: ['green', 'red', 'yellow']
+
+roboflow:
+  workspace: kiwi-nan-spmuj
+  project: traffic-light-detection-cdq70
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/kiwi-nan-spmuj/traffic-light-detection-cdq70/dataset/1
