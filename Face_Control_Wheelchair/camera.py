@@ -11,12 +11,17 @@ class libcamera(object):
         self.capnum = 0
         self.mid_x = 0
         self.mid_y = 0
+        self.x_63 = 0
+        self.y_63 = 0
+        self.x_67 = 0
+        self.y_67 = 0
         self.predictor = dlib.shape_predictor("Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
         self.detector = dlib.get_frontal_face_detector()
-        self.traffic_light_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/traffic_light_model/230406_2038.pt')
-        self.object_detect_model = YOLO('yolov8n.pt')
+        self.traffic_light_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light/230406_2038.pt')
+        self.object_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Yolo_model/yolov8n.pt')
         self.object_detect_cls = None
         self.object_detect_xyxy = None
+
     def loop_break(self):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print("Camera Readding is ended.")
@@ -98,29 +103,40 @@ class libcamera(object):
 
                     if i == 34:
                         self.mid_x, self.mid_y = shape_point.x, shape_point.y
+                    
+                    if i == 63:
+                        self.x_63, self.y_63 = shape_point.x, shape_point.y
+                    
+                    if i == 67:
+                        self.x_67, self.y_67 = shape_point.x, shape_point.y
         
         cv2.imshow("Face_Detect", replica)
     
     def face_direction(self):
-
-        if abs(self.mid_x - MID_X) < 20:
+        if self.y_67 - self.y_63 >= 30:
             print("----------------------------")
-            print("예상 얼굴 방향 : G")
+            print("비상 정지")
             print("----------------------------")
-            return 'G'
+            return 'S'
         else:
-            if MID_X - self.mid_x > 0:
-                abs(MID_X - self.mid_x)
+            if abs(self.mid_x - MID_X) <= 20:
                 print("----------------------------")
-                print("예상 얼굴 방향 : R")
+                print("예상 얼굴 방향 : G")
                 print("----------------------------")
-                return 'R'
+                return 'G'
             else:
-                abs(MID_X - self.mid_x)
-                print("----------------------------")
-                print("예상 얼굴 방향 : L")
-                print("----------------------------")
-                return 'L'
+                if MID_X - self.mid_x > 0:
+                    abs(MID_X - self.mid_x)
+                    print("----------------------------")
+                    print("예상 얼굴 방향 : R")
+                    print("----------------------------")
+                    return 'R'
+                else:
+                    abs(MID_X - self.mid_x)
+                    print("----------------------------")
+                    print("예상 얼굴 방향 : L")
+                    print("----------------------------")
+                    return 'L'
             
     def traffic_light_detect(self, frame):
         red_traffic = False
@@ -135,14 +151,29 @@ class libcamera(object):
             
             boxes_xyxy = boxes.xyxy.cpu().numpy()
             boxes_cls = boxes.cls.cpu().numpy()
-            if boxes_cls is not None:
+            if min(len(boxes_xyxy),len(self.object_detect_xyxy)) == 1:
                 ob_x, ob_y = (self.object_detect_xyxy[0][2] + self.object_detect_xyxy[0][0])/2, (self.object_detect_xyxy[0][3] + self.object_detect_xyxy[0][1])/2
                 if ob_x > boxes_xyxy[0][0] and ob_x < boxes_xyxy[0][2] and ob_y > boxes_xyxy[0][1] and ob_y < boxes_xyxy[0][3]:
                     print("----------------------------")
-                    print("신호등 위치 : {}".format(boxes.xyxy[0]))
+                    print("적색 신호등 위치 : {}".format(boxes.xyxy[0]))
                     print("----------------------------")
                     if np.any(boxes_cls == 1) == True:
                         red_traffic = True
+                    else:
+                        red_traffic = False
+
+            elif min(len(boxes_xyxy),len(self.object_detect_xyxy)) > 1:
+                for i in range(min(len(boxes_xyxy),len(self.object_detect_xyxy))):
+                    ob_x, ob_y = (self.object_detect_xyxy[i][2] + self.object_detect_xyxy[i][0])/2, (self.object_detect_xyxy[i][3] + self.object_detect_xyxy[i][1])/2
+                    if ob_x > boxes_xyxy[i][0] and ob_x < boxes_xyxy[i][2] and ob_y > boxes_xyxy[i][1] and ob_y < boxes_xyxy[i][3]:
+                        print("----------------------------")
+                        print("적색 신호등 위치 : {}".format(boxes.xyxy[i]))
+                        print("----------------------------")
+                        if np.any(boxes_cls == 1) == True:
+
+                            red_traffic = True
+                        else:
+                            red_traffic = False
 
         cv2.imshow("YOLOv8_traffic_light", result)
         return red_traffic
@@ -151,7 +182,37 @@ class libcamera(object):
         results = self.object_detect_model(frame)
         result = results[0].plot()
         boxes = results[0].boxes
-        self.object_detect_cls = boxes.cls.cpu().numpy()
-        self.object_detect_xyxy = boxes.xyxy.cpu().numpy() #traffic_light cls 9
+        self.object_detect_cls = boxes.cls.cpu().numpy() #traffic_light cls 9
+        self.object_detect_xyxy = boxes.xyxy.cpu().numpy() 
         
+        square_img = np.zeros((480, 640), np.uint8)
+        polygon_img = np.zeros((480, 640), np.uint8)
+
+        pts = np.array([[200, 300], [640-200, 300], [640, 479], [0, 479]])
+        cv2.polylines(polygon_img, [pts], True, (0, 0, 255), 3)
+        cv2.polylines(result, [pts], True, (0, 0, 255), 3)
+        pts = pts.reshape((-1, 1, 2))
+        cv2.fillPoly(polygon_img, [pts], (255, 255, 255))
+
         cv2.imshow("YOLOv8_obstacle", result)
+        if len(self.object_detect_xyxy) == 1:
+            cv2.rectangle(square_img, (int(self.object_detect_xyxy[0][0]), int(self.object_detect_xyxy[0][1])), (int(self.object_detect_xyxy[0][2]), int(self.object_detect_xyxy[0][3])), (255, 255, 255), -1)
+            intersection = cv2.bitwise_and(polygon_img, square_img, mask=polygon_img)
+
+            if np.sum(intersection) > 0:
+                print("진행 방향에 장애물이 있습니다.")
+                return False
+            else:
+                print("진행 방향에 장애물이 없습니다.")
+                return True
+        elif len(self.object_detect_xyxy) > 1:
+            for i in range(len(self.object_detect_xyxy)):
+                cv2.rectangle(square_img, (int(self.object_detect_xyxy[i][0]), int(self.object_detect_xyxy[i][1])), (int(self.object_detect_xyxy[i][2]), int(self.object_detect_xyxy[i][3])), (255, 255, 255), -1)
+                intersection = cv2.bitwise_and(polygon_img, square_img, mask=polygon_img)
+
+                if np.sum(intersection) > 0:
+                    print("진행 방향에 장애물이 있습니다.")
+                    return False
+                else:
+                    print("진행 방향에 장애물이 없습니다.")
+                    return True

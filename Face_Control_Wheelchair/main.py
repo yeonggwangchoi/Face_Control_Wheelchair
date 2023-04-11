@@ -18,15 +18,14 @@ if __name__ == "__main__":
 
         cam.face_detect(frame0)
         sorvo = cam.face_direction()
-        if red_traffic == True and sorvo == 'G':
-            com.write(b'b')
+        if np.any(cam.object_detect_cls == 9) == True:
+           red_traffic = cam.traffic_light_detect(frame1)
+        obstacle = cam.object_detect(frame1)
+
+        if (red_traffic == True and sorvo == 'G') or (obstacle == False and sorvo == 'G'):
+            com.write(b'S')
         else:
             com.write(sorvo.encode())
 
-        cam.object_detect(frame1)
-
-        if np.any(cam.object_detect_cls == 9) == True:
-           red_traffic = cam.traffic_light_detect(frame1)
-        
         if cam.loop_break():
             break
