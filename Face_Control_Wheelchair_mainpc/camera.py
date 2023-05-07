@@ -42,8 +42,8 @@ class libcamera(object):
             if channel1.isOpened():
                 print("Camera Channel0 is enabled!")
 
-        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 160)
-        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 120)
+        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         channel0.set(cv2.CAP_PROP_FPS, 60)
         
         channel1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
