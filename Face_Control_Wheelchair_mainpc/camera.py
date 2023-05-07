@@ -104,7 +104,7 @@ class libcamera(object):
                     
                     if i == 67:
                         self.x_67, self.y_67 = shape_point.x, shape_point.y
-        
+        cv2.line(replica, (160, 0), (160, 240),(0, 0, 255), 3)
         cv2.imshow("Face_Detect", replica)
     
     def face_direction(self):
