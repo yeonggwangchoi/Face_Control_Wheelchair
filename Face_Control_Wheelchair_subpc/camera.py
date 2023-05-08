@@ -18,7 +18,7 @@ class libcamera(object):
         # self.predictor = dlib.shape_predictor("Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
         # self.detector = dlib.get_frontal_face_detector()
         self.traffic_light_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light/230406_2038.pt')
-        self.object_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Yolo_model/yolov8n.pt')
+        self.object_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Yolo_model/yolov8m.pt')
         self.object_detect_cls = None
         self.object_detect_xyxy = None
 
@@ -188,7 +188,7 @@ class libcamera(object):
         square_img = np.zeros((480, 640), np.uint8)
         polygon_img = np.zeros((480, 640), np.uint8)
 
-        pts = np.array([[200, 300], [640-200, 300], [640, 479], [0, 479]])
+        pts = np.array([[200, 400], [640-200, 400], [640, 479], [0, 479]])
         cv2.polylines(polygon_img, [pts], True, (0, 0, 255), 3)
         cv2.polylines(result, [pts], True, (0, 0, 255), 3)
         pts = pts.reshape((-1, 1, 2))
