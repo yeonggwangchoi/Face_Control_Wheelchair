@@ -3,7 +3,7 @@ import numpy as np
 import dlib
 import time
 
-MID_X = 80
+MID_X = 160
 
 class libcamera(object):
     def __init__(self):
@@ -42,8 +42,8 @@ class libcamera(object):
             if channel1.isOpened():
                 print("Camera Channel0 is enabled!")
 
-        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 160)
-        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 120)
+        channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+        channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         channel0.set(cv2.CAP_PROP_FPS, 60)
         
         channel1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -104,11 +104,11 @@ class libcamera(object):
                     
                     if i == 67:
                         self.x_67, self.y_67 = shape_point.x, shape_point.y
-        
+        cv2.line(replica, (160, 0), (160, 240),(0, 0, 255), 3)
         cv2.imshow("Face_Detect", replica)
     
     def face_direction(self):
-        if self.y_67 - self.y_63 >= 30:
+        if self.y_67 - self.y_63 >= 15:
             print("----------------------------")
             print("비상 정지")
             print("----------------------------")
