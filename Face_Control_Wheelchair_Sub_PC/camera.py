@@ -113,7 +113,7 @@ class libcamera(object):
             print("----------------------------")
             return 'S'
         else:
-            if abs(self.mid_x - MID_X) <= 20:
+            if abs(self.mid_x - MID_X) <= 10:
                 print("----------------------------")
                 print("예상 얼굴 방향 : G")
                 print("----------------------------")

@@ -15,6 +15,7 @@ class libcamera(object):
         self.y_63 = 0
         self.x_67 = 0
         self.y_67 = 0
+        # 아래 주석처리 한 부분은 실제 사람이 앉을 경우
         # self.predictor = dlib.shape_predictor("Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
         # self.detector = dlib.get_frontal_face_detector()
         self.traffic_light_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light/230406_2038.pt')

@@ -33,4 +33,5 @@ if __name__ == "__main__":
             com_at.write(motor)
     
         if cam.loop_break():
+            com_at.write(b'S')
             break
