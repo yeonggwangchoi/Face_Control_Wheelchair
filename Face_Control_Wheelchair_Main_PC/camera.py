@@ -19,7 +19,7 @@ class libcamera(object):
         # self.predictor = dlib.shape_predictor("Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
         # self.detector = dlib.get_frontal_face_detector()
         self.traffic_light_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light/230406_2038.pt')
-        self.object_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Yolo_model/yolov8m.pt')
+        self.object_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Yolo_model/yolov8l.pt')
         self.object_detect_cls = None
         self.object_detect_xyxy = None
 
