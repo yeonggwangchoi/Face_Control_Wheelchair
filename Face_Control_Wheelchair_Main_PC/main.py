@@ -24,7 +24,7 @@ if __name__ == "__main__":
         motor = com_desk.read()
     
         if np.any(cam.object_detect_cls == 9) == True:
-           red_traffic = cam.traffic_light_detect(frame0)
+           red_traffic = cam.traffic_light_detect(frame1)
         obstacle = cam.object_detect(frame0)
 
         if (red_traffic == True and motor == b'G') or (obstacle == False and motor == b'G'):
