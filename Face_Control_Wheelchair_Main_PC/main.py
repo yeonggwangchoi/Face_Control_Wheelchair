@@ -6,7 +6,7 @@ import numpy as np
 #고정상수&고정변수 초기화
 EPOCH = 500000
 atmega_port = 'com15'
-raspberry_port = 'com18'
+raspberry_port = 'com12'
 red_traffic = False
     
 if __name__ == "__main__":
@@ -22,9 +22,8 @@ if __name__ == "__main__":
         _, frame0, _, frame1 = cam.camera_read(ch0, ch1)
 
         motor = com_desk.read()
-    
-        if np.any(cam.object_detect_cls == 9) == True:
-           red_traffic = cam.traffic_light_detect(frame1)
+        print(motor)
+        red_traffic = cam.traffic_light_detect(frame1)
         obstacle = cam.object_detect(frame0)
 
         if (red_traffic == True and motor == b'G') or (obstacle == False and motor == b'G'):

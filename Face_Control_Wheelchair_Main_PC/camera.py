@@ -18,11 +18,12 @@ class libcamera(object):
         # 아래 주석처리 한 부분은 실제 사람이 앉을 경우
         # self.predictor = dlib.shape_predictor("Face_Control_Wheelchair/shape_predictor_68_face_landmarks.dat")
         # self.detector = dlib.get_frontal_face_detector()
-        self.traffic_light_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Traffic_Light/230406_2038.pt')
-        self.object_detect_model = YOLO('D:/Glory_ws/Face_Control_Wheelchair/Yolo_model/yolov8l.pt')
+        self.traffic_light_detect_model = YOLO('C:/Users/user/Desktop/Face_Control_Wheelchair/Traffic_Light/230406_2038.pt')
+        self.object_detect_model = YOLO('C:/Users/user/Desktop/Face_Control_Wheelchair/Yolo_model/yolov8n.pt')
         self.object_detect_cls = None
         self.object_detect_xyxy = None
-
+        self.traffic_light_object_detect_cls = None
+        self.traffic_light_object_detect_xyxy = None
     def loop_break(self):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print("Camera Readding is ended.")
@@ -46,7 +47,7 @@ class libcamera(object):
                 print("Camera Channel0 is enabled!")
             channel1 = cv2.VideoCapture(cam1port, cv2.CAP_DSHOW)
             if channel1.isOpened():
-                print("Camera Channel0 is enabled!")
+                print("Camera Channel1 is enabled!")
 
         channel0.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         channel0.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -141,42 +142,52 @@ class libcamera(object):
             
     def traffic_light_detect(self, frame):
         red_traffic = False
+
+        ob_results = self.object_detect_model(frame)
+        ob_boxes = ob_results[0].boxes
+        ob_result = ob_results[0].plot()
+        self.traffic_light_object_detect_cls = ob_boxes.cls.cpu().numpy() #traffic_light cls 9
+        self.traffic_light_object_detect_xyxy = ob_boxes.xyxy.cpu().numpy()
+
         results = self.traffic_light_detect_model(frame)
         result = results[0].plot()
         boxes = results[0].boxes
 
-        if np.any(self.object_detect_cls == 9) == True:
+        
+        if np.any(self.traffic_light_object_detect_cls == 9) == True:
             print("----------------------------")
             print("객체 인식중 신호등 감지")
             print("----------------------------")
             
             boxes_xyxy = boxes.xyxy.cpu().numpy()
             boxes_cls = boxes.cls.cpu().numpy()
-            if min(len(boxes_xyxy),len(self.object_detect_xyxy)) == 1:
-                ob_x, ob_y = (self.object_detect_xyxy[0][2] + self.object_detect_xyxy[0][0])/2, (self.object_detect_xyxy[0][3] + self.object_detect_xyxy[0][1])/2
-                if ob_x > boxes_xyxy[0][0] and ob_x < boxes_xyxy[0][2] and ob_y > boxes_xyxy[0][1] and ob_y < boxes_xyxy[0][3]:
-                    print("----------------------------")
-                    print("적색 신호등 위치 : {}".format(boxes.xyxy[0]))
-                    print("----------------------------")
-                    if np.any(boxes_cls == 1) == True:
-                        red_traffic = True
-                    else:
-                        red_traffic = False
+                
+            # if min(len(boxes_xyxy),len(self.traffic_light_object_detect_xyxy)) == 1:
+            #     ob_x, ob_y = (self.traffic_light_object_detect_xyxy[0][2] + self.traffic_light_object_detect_xyxy[0][0])/2, (self.traffic_light_object_detect_xyxy[0][3] + self.traffic_light_object_detect_xyxy[0][1])/2
+            #     if ob_x > boxes_xyxy[0][0] and ob_x < boxes_xyxy[0][2] and ob_y > boxes_xyxy[0][1] and ob_y < boxes_xyxy[0][3]:
+            #         print("----------------------------")
+            #         print("적색 신호등 위치 : {}".format(boxes.xyxy[0]))
+            #         print("----------------------------")
+            #         if np.any(boxes_cls == 1) == True:
+            #             print(True)
+            #             red_traffic = True
+            #         else:
+            #             red_traffic = False
 
-            elif min(len(boxes_xyxy),len(self.object_detect_xyxy)) > 1:
-                for i in range(min(len(boxes_xyxy),len(self.object_detect_xyxy))):
-                    ob_x, ob_y = (self.object_detect_xyxy[i][2] + self.object_detect_xyxy[i][0])/2, (self.object_detect_xyxy[i][3] + self.object_detect_xyxy[i][1])/2
-                    if ob_x > boxes_xyxy[i][0] and ob_x < boxes_xyxy[i][2] and ob_y > boxes_xyxy[i][1] and ob_y < boxes_xyxy[i][3]:
-                        print("----------------------------")
-                        print("적색 신호등 위치 : {}".format(boxes.xyxy[i]))
-                        print("----------------------------")
-                        if np.any(boxes_cls == 1) == True:
+            # elif min(len(boxes_xyxy),len(self.traffic_light_object_detect_xyxy)) > 1:
+            #     for i in range(min(len(boxes_xyxy),len(self.traffic_light_object_detect_xyxy))):
+            #         ob_x, ob_y = (self.traffic_light_object_detect_xyxy[i][2] + self.traffic_light_object_detect_xyxy[i][0])/2, (self.traffic_light_object_detect_xyxy[i][3] + self.traffic_light_object_detect_xyxy[i][1])/2
+            #         if ob_x > boxes_xyxy[i][0] and ob_x < boxes_xyxy[i][2] and ob_y > boxes_xyxy[i][1] and ob_y < boxes_xyxy[i][3]:
+            #             print("----------------------------")
+            #             print("적색 신호등 위치 : {}".format(boxes.xyxy[i]))
+            #             print("----------------------------")
+            if np.any(boxes_cls == 1) == True:
 
-                            red_traffic = True
-                        else:
-                            red_traffic = False
-
-        cv2.imshow("YOLOv8_traffic_light", result)
+                red_traffic = True
+            else:
+                red_traffic = False
+            cv2.imshow("YOLOv8_traffic_light", result)
+        cv2.imshow("YOLOv8_ob_traffic_light", ob_result)
         return red_traffic
     
     def object_detect(self, frame):
